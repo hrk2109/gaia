@@ -1,0 +1,197 @@
+%\VignetteIndexEntry{gaia}
+%\VignetteDepends{}
+%\VignetteKeywords{CGH Analysis}
+%\VignettePackage{gaia}
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{graphicx}
+\usepackage[dvips,colorlinks=true]{hyperref}
+\hypersetup{
+	bookmarksnumbered=true,
+	linkcolor=black,
+	citecolor=black,
+	pagecolor=black,
+	urlcolor=black,
+}
+
+%opening
+\title{GAIA: Genomic Analysis of Important Aberrations}
+
+\author{Sandro Morganella \and Stefano Maria Pagnotta \and Michele Ceccarelli}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Overview}
+A current challenge in biology is the characterization of genetic mutations that occur as response to a particular disease. Development of array comparative genomic hybridization (aCGH) technology has been a very important step in genomic mutation analysis, indeed, it enables copy number measurement in hundreds of thousands of genomic points (called markers or probes). Despite the high resolution of aCGH, accurate analysis of these data is yet a challenge. In particular a major difficulty in mutation identification is the distinction between driver mutations (that play a fundamental role in cancer progression) and passenger mutations (which are random alterations with no selective advantages).
+
+This document describes classes and functions of GAIA (Genomic Analysis of Important Aberrations) package. GAIA uses a statistical framework based on a conservative permutation test allowing the estimation of the probability distribution of the contemporary mutations expected for non-driver markers. Afterwards, the computed probability distribution and the observed data are used to assess the statistical significance (in terms of $q$-value) of each marker. Finally an iterative \lq\lq peel-off\rq\rq~procedure is used to identify the most significant independent regions which have a high probability to correspond to driver mutations.
+
+\section{Installation}
+Install GAIA on your computer by using the following command:
+
+\begin{verbatim}
+source("http://bioconductor.org/biocLite.R")
+biocLite("gaia")
+\end{verbatim}
+
+GAIA package can be loaded in R by using the following command:
+<<loadGAIA>>=
+library(gaia)
+@
+
+\section{Package Dependencies}
+In order to use GAIA you need of the R package {\ttfamily qvalue} available at the bioconductor repository.\\
+Note that by using the installation command {\ttfamily biocLite} the {\ttfamily qvalue} dependency is automatically fulfilled. In contrast if GAIA has been manually installed (e.g. using {\ttfamily R CMD INSTALL} command) you can install {\ttfamily qvalue} package by the following command:
+
+\begin{verbatim}
+source("http://bioconductor.org/biocLite.R")
+biocLite("qvalue")
+\end{verbatim}
+
+\section{Vega Data Description}
+\label{dataDescription}
+In this section the data object used by GAIA will be described. This description will be supported by the data provided in GAIA package.
+
+\subsection{Marker Descriptor Matrix}
+\label{dataDescription_markers}
+This matrix contains all needed informations about the observed markers (also called probes). This matrix has a row for each marker and each marker is described by a set of column reporting the name of the probe and its genomic position. In particular the matrix has the following columns:
+\begin{description}
+ \item[Probe Name]: The name of the observed probe;
+ \item[Chromosome]: The chromosome where the probe is located;
+ \item[Start]: The genomic position (in bp) where the probe starts;
+ \item[End]: The genomic position (in bp) where the probe ends;
+ \end{description}
+
+The column specifying the \textbf{End} position is optional and when it is missed, start and end positions are considered to be coincident. This is the case of the data provided within the package.
+
+In order to load the marker descriptor matrix provided in GAIA use the following command:
+<<loadMarkersData>>=
+data(synthMarkers_Matrix)
+@
+
+This marker descriptor matrix simulates the genomic position for the probes of $24$ chromosomes (each chromosome has $1000$ probes). Chromosomes  $23$ and $24$ represents sex chromosomes $X$ and $Y$ respectively.
+
+
+\subsection{Aberrant Region Descriptor Matrix}
+\label{dataDescription_region}
+This matrix contains all needed informations about the observed aberrant regions.This matrix has a row for each aberrant region and each of them is described by the following columns:
+\begin{description}
+ \item[Sample Name]: The name of the sample in which the aberrant region is observed;
+ \item[Chromosome]: The chromosome where the aberrant region is located;
+ \item[Start]: The genomic position (in bp) where the aberrant region starts;
+ \item[End]: The genomic position (in bp) where the aberrant region ends;
+ \item[Num of Markers]: The number of markers contained in the aberrant region;
+ \item[Aberration]: An integer indicating the kind of the mutation.
+ \end{description}
+The column \textbf{Aberration} can assume only integer values in the range $0,\cdots,K-1$ where $K$ is the number of considered aberrations. For example if we are considering loss, LOH and gain mutations than the only valid values for the column \textbf{Aberration} are $0$, $1$ and $2$.
+
+In order to load the aberrant region descriptor matrix use the following command:
+<<loadCNVData>>=
+data(synthCNV_Matrix)
+@
+
+This aberrant region descriptor matrix simulates $10$ samples for the chromosomes described by {\ttfamily synthMarkers\_Matrix}. A summary of the aberrant regions contained in this matrix follows:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Chromosome & Frequency Percentage & Start & End & Aberration Kind \\ \hline\hline
+1 & 100\% & 301 & 700 & 0 \\ \hline
+2 & 80\% & 301 & 700 & 0 \\ \hline
+3 & 60\% & 301 & 700 & 0 \\ \hline
+4 & 40\% & 301 & 700 & 0 \\ \hline
+5 & 20\% & 301 & 700 & 0 \\ \hline
+10 & 100\% & 1 & 700 & 1 \\ \hline
+11 & 80\% & 1 & 700 & 1 \\ \hline
+12 & 60\% & 1 & 700 & 1 \\ \hline
+13 & 40\% & 1 & 700 & 1 \\ \hline
+14 & 20\% & 1 & 700 & 1 \\ \hline
+20 & 100\% & 801 & 1000 & 2 \\ \hline
+21 & 80\% & 801 & 1000 & 2 \\ \hline
+22 & 60\% & 801 & 1000 & 2 \\ \hline
+23 & 40\% & 801 & 1000 & 2 \\ \hline
+24 & 20\% & 801 & 1000 & 2 \\\hline
+\end{tabular}
+\caption{{\ttfamily synthMarkers\_Matrix}: Aberrant Region Detail. The column \textbf{Frequency Percentage} reports the percentage of samples containing the indicated aberration.}\label{tab:aberrant_reg_detail}
+\end{table}
+
+
+\section{Function Description}
+\label{functionDescription}
+In this section all exported functions of GAIA package are described. GAIA works on aCGH data in which hundreds of thousands probes are contemporary observed, so the data loading phase can be very time consuming. For this reason in GAIA two data loading functions are provided (see Sections \ref{functionDescription_loadMarkers} and \ref{functionDescription_loadCNV}). By using this functions the users can load just one time the data and save they into data objects that can be used for several GAIA executions.
+
+
+\subsection{{\ttfamily load\_markers}}
+\label{functionDescription_loadMarkers}
+This function builds the marker descriptor object used in GAIA from a marker matrix as described in Section \ref{dataDescription_markers}:
+<<createMarkersObject>>=
+markers_obj <- load_markers(synthMarkers_Matrix)
+@
+
+The {\ttfamily marker\_obj} provides an easy access to the data informations contained in the marker matrix and and it is organized as a list:
+
+the element {\ttfamily marker\_obj[[i]]} contains the descriptions of all observed markers for the $i$-th chromosome and it is organized as a matrix of dimension $2\times M$ ($M$ is the number of observed probes for the $i$-th chromosome). First and second row of this matrix contains start and end position respectively.
+
+\subsection{{\ttfamily load\_cnv}}
+\label{functionDescription_loadCNV}
+This function builds the aberrant region descriptor object used in GAIA by using both the region matrix described in Section \ref{dataDescription_region} and the marker descriptor object created by the function {\ttfamily load\_markers}, in addition the number of the analyzed samples must be passed as argument:
+
+<<createCNVObject>>=
+cnv_obj <- load_cnv(synthCNV_Matrix, markers_obj, 10)
+@
+
+The {\ttfamily cnv\_obj} is organized as a double list:
+
+the element {\ttfamily cnv\_obj[[j]][[i]]} contains the informations about the $j$-th aberration of the $i$-th chromosome. In particular {\ttfamily cnv\_obj[[j]][[i]]} is a matrix of dimension $N\times M$ where $N$ is the number of samples (in the example $10$) and $M$ the the number of observed probes for the $i$-th chromosome. The element {\ttfamily cnv\_obj[[j]][[i]][n,m]} is equal to $1$ if in the marker $m$ of the chromosome $i$ a mutation of kind $j$ is observed, it is equal to $0$ otherwise.
+
+\subsection{{\ttfamily runGAIA}}
+\label{functionDescription_GAIA}
+This is the core function of the package, indeed it allows to execute GAIA algorithm. In particular {\ttfamily runGAIA} has the following header:\\\\{\ttfamily runGAIA(cnv\_obj, markers\_obj, output\_file\_name="", aberrations = -1,\\chromosomes = -1, num\_iterations = 10, threshold = 0.25)}
+
+\begin{description}
+ \item[{\ttfamily cnv\_obj}]: The aberrant region descriptor object created by using the function {\ttfamily load\_cnv} (see Section \ref{functionDescription_loadCNV});
+ \item[{\ttfamily markers\_obj}]: The marker descriptor object created by the function\\{\ttfamily load\_markers} (see Section \ref{functionDescription_loadMarkers});
+ \item[{\ttfamily output\_file\_name}]: (default \lq\lq\rq\rq) The file name used to save the significant aberrant regions. If this argument is not specified the results will be not saved into a file;
+ \item[{\ttfamily aberrations}]: (default $-1$) The aberrations that will be analyzed. The default value $-1$ indicates that all aberration will be analyzed;
+  \item[{\ttfamily chromosomes}]: (default $-1$) The chromosomes that will be to analyzed. The default value $-1$ indicates that all chromosomes will be analyzed;
+  \item[{\ttfamily num\_iterations}]: (default $10$) The number of random permutation used to estimate the probability distribution of the contemporary mutations expected for non-driver markers;
+  \item[{\ttfamily threshold}]: (default $0.25$) Markers having $q$-values lower than this threshold are labeled as significantly aberrant.
+ \end{description}
+
+Suppose that we want to analyze all aberrations and all chromosomes and that we want to save the results within the file CompleteResults.txt, than we use the following command:
+
+<<runGAIA_default>>=
+results <- runGAIA(cnv_obj, markers_obj, "CompleteResults.txt")
+@ 
+
+Both in the file CompleteResults.txt and in the matrix variable {\ttfamily results} we can found all significant aberrant regions. In particular the following column are used to describe each significant aberrant region:
+
+\begin{description}
+ \item[Chromosome]: The chromosome where the aberrant region is located;
+ \item[Aberration Kind]: An integer indicating the kind of the mutation;
+ \item[Region Start [bp]]: The genomic position (in bp) where the aberrant region starts;
+ \item[Region End [bp]]: The genomic position (in bp) where the aberrant region ends; 
+ \item[Region Size [bp]]: The size (in bp) of the aberrant region;
+ \item[q-value]: The estimated $q$-value for the aberrant region.
+\end{description}
+
+So with the following command we print the significant aberrant regions having the minimum $q$-values:
+
+<<printResults, results=hide>>==
+results[which(results[,6]==min(results[,6])),]
+@
+
+
+Suppose now that we want to analyze only the aberration $1$ on the chromosomes $10$, $11$ and $14$ and that we want to save the results within the file Results.txt. In addition we increase the significance threshold value from $0.25$ to $0.5$, than we use the following command:
+
+<<runGAIA_notDefault>>=
+results <- runGAIA(cnv_obj, markers_obj, "Results.txt", aberrations=1, chromosomes=c(10, 11, 14), threshold=0.5)
+@
+
+\end{document}
