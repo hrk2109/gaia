@@ -1,5 +1,5 @@
 `runGAIA` <-
-function(cnv_obj, markers_obj, output_file_name="",  aberrations=-1, chromosomes=-1, num_iterations=10, threshold=0.25){
+function(cnv_obj, markers_obj, output_file_name="",  aberrations=-1, chromosomes=-1, num_iterations=10, threshold=0.25, hom_threshold=0.12){
 
 # Chromosome indexing array
 if(chromosomes==-1){ 
@@ -18,14 +18,52 @@ if(chromosomes==-1){
 # Aberration Kind indexing array
 if(aberrations==-1){ 
 	# We apply the algorithm to each aberrations
-	aberrations <- as.numeric(names(cnv_obj))+1;
+	aberrations <- as.numeric(names(cnv_obj));
+	names(aberrations) <- names(cnv_obj);
+	if(length(aberrations)>0 && aberrations[1]==0){
+		aberrations <- aberrations+1;
+	}
+	
 }else{
-	aberrations <- aberrations+1;
+	aberrations <- as.numeric(names(cnv_obj));
+	names(aberrations) <- names(cnv_obj);
+	if(length(aberrations)>0 && aberrations[1]==0){
+		aberrations <- aberrations+1;
+	}
 	known_aberr <- as.numeric(names(cnv_obj));
 	if( (length(known_aberr[aberrations])!= length(aberrations)) || (sum(is.na(known_aberr[aberrations])>0)) ){
 		error_string <- "Error in the list of aberrations passed as argument.\n";
 		error_string <- cat(error_string, "The aberrations that can be analyzed follow:\n", known_aberr, "\n");
 		stop(error_string, call.=FALSE);
+	}
+}
+
+# Discontinuity Matrix for Homogeneous peel-off
+discontinuity <- list();
+if(length(aberrations)==2 && hom_threshold>=0){
+	message("\nComputing the Discontinuity Matrix");
+	for (i in 1:length(chromosomes)){
+		message(".", appendLF = FALSE);
+		tmp <- cnv_obj[[2]][[chromosomes[i]]]-cnv_obj[[1]][[chromosomes[i]]];
+		tmp_vec <- 0*c(1:(ncol(tmp)-1));
+	
+		for(k in 1:(ncol(tmp)-1)){
+			for(z in 1:nrow(tmp)){
+				tmp_vec[k] <- tmp_vec[k]+ abs(tmp[z,k]-tmp[z,k+1]);
+			}
+		}
+		discontinuity[[chromosomes[i]]] <- tmp_vec/nrow(cnv_obj[[2]][[chromosomes[i]]]);
+	}
+	message("\nDone");
+}else{
+	if(length(aberrations)!=2 && hom_threshold>=0){
+		message("\nHomogeneous cannot be applied on the data (data must contain exactly two different kinds aberrations)\n");
+	}
+	for (i in 1:length(chromosomes)){
+		tmp <- cnv_obj[[1]][[chromosomes[i]]]-cnv_obj[[1]][[chromosomes[i]]];
+		tmp_vec <- 0*c(1:(ncol(tmp)-1));		
+		discontinuity[[chromosomes[i]]] <- tmp_vec;
+		hom_threshold = -1;
 	}
 }
 
@@ -50,6 +88,7 @@ for (k in 1:length(aberrations)){
 	}	
 	null_hypothesis_list[[aberrations_index]] <- null_hypothesis_chromosome_list;
 }
+
 # Compute the p-value curve for each chromosome and aberration
 pvalue_distribution_list <- list();
 for (k in 1:length(aberrations)){
@@ -89,11 +128,16 @@ for (k in 1:length(aberrations)){
 	}	
 	pvalues_list[[aberrations_index]] <- pvalue_chromosome_list;
 }
+
 message("\nDone");
 # Running the peel-off algorithm
-message("Running the peel-off Algorithm With a Significance Threshold of ", threshold);
-significant_regions_list <- peel_off(pvalues_list, threshold, chromosomes, aberrations);
-
+if(hom_threshold>=0){
+	message("Running Homogeneous peel-off Algorithm With a Significance Threshold of ", threshold,  " and Homogenous Threshold of ", hom_threshold);
+}else{
+	message("Running Standard the peel-off Algorithm With a Significance Threshold of ", threshold);
+}
+significant_regions_list <- peel_off(pvalues_list, threshold, chromosomes, aberrations, discontinuity, hom_threshold);
+#return(significant_regions_list);
 if(output_file_name!=""){
 	# Generation of output file
 	message("\nGenerating the Output File \'", output_file_name, "\' Containing the Significant Regions\n", sep="");

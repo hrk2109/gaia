@@ -121,6 +121,16 @@ Chromosome & Frequency Percentage & Start & End & Aberration Kind \\ \hline\hlin
 \caption{{\ttfamily synthMarkers\_Matrix}: Aberrant Region Detail. The column \textbf{Frequency Percentage} reports the percentage of samples containing the indicated aberration.}\label{tab:aberrant_reg_detail}
 \end{table}
 
+\subsection{Real aCGH Datset}
+\label{real_dataset}
+In GAIA a real aCGH dataset is also provided, in the next we provide a brief description of this dataset. Raw data were preprocessed by PennCNV tool \cite{WangPennCNV_2007} and segmented by using Vega R/Bioconductor package \cite{Morganella_2010}.
+
+\subsubsection{Colorectal Cancer (CRC) Dataset}
+\label{crc}
+CRC dataset is composed by 30 samples hybridized on SNP 250k Affymetrix GeneChip array \cite{Venkatachalam2010}. Raw data are available in GEO with identifier GSE13429. Patients of this dataset were diagnosed with microsatellite-stable CRC without polyposis.
+
+In order to run GAIA on this dataset both aberrant region descriptor matrix ({\ttfamily crc}) and marker descriptor matrix ({\ttfamily crc\_markers}) are provided.
+
 
 \section{Function Description}
 \label{functionDescription}
@@ -161,7 +171,8 @@ This is the core function of the package, indeed it allows to execute GAIA algor
  \item[{\ttfamily aberrations}]: (default $-1$) The aberrations that will be analyzed. The default value $-1$ indicates that all aberration will be analyzed;
   \item[{\ttfamily chromosomes}]: (default $-1$) The chromosomes that will be to analyzed. The default value $-1$ indicates that all chromosomes will be analyzed;
   \item[{\ttfamily num\_iterations}]: (default $10$) The number of random permutation used to estimate the probability distribution of the contemporary mutations expected for non-driver markers;
-  \item[{\ttfamily threshold}]: (default $0.25$) Markers having $q$-values lower than this threshold are labeled as significantly aberrant.
+  \item[{\ttfamily threshold}]: (default $0.25$) Markers having $q$-values lower than this threshold are labeled as significantly aberrant. This parameter must be a real number in the range $0-1$;
+  \item[{\ttfamily hom\_threshold}]: (default $0.12$) Threshold used in homogeneous peel-off (for more detail see Section \ref{hom_peeloff}). This parameter must be a real number in the range $0-1$ and by using  values lower than $-1$ homogeneous peel-off is disabled and standard peel-off procedure is used.
  \end{description}
 
 Suppose that we want to analyze all aberrations and all chromosomes and that we want to save the results within the file CompleteResults.txt, than we use the following command:
@@ -193,5 +204,37 @@ Suppose now that we want to analyze only the aberration $1$ on the chromosomes $
 <<runGAIA_notDefault>>=
 results <- runGAIA(cnv_obj, markers_obj, "Results.txt", aberrations=1, chromosomes=c(10, 11, 14), threshold=0.5)
 @
+
+\section{Homogeneous Peel-off}
+\label{hom_peeloff}
+In GAIA a new peel-off procedure, called homogeneous, is available. By usinh homogeneous peel-off significant regions are detected by using both statistical significance and within-sample homogeneity, so that more accurate results can be obtained. Homogeneou peel-off is disabled for values lower than 0.
+
+Homogeneous peel-off can be used only if two kinds of aberrations are observed. In the next we show as homogeneous peel-off can be used on CRC dataset. The first step is composed by the loading of the data and the creation of the respective markers and aberrant regions descriptor objects:
+
+<<loadCRC>>=
+data(crc_markers)
+data(crc)
+crc_markers_obj <- load_markers(crc_markers)
+crc_cnv_obj <- load_cnv(crc, crc_markers_obj, 30)
+@
+
+Now we can run GAIA with homogeneous pee-off on the chromosome 14 by using the suggested value for {\ttfamily hom\_threshold} of $0.12$:
+
+<<runGAIA_on_CRC>>=
+res <- runGAIA(crc_cnv_obj, crc_markers_obj, "crcResults.txt",  chromosomes=14, hom_threshold=0.12)
+@
+
+Results of the computation are saved in the file crcResults.txt
+
+\begin{thebibliography}{}
+
+\bibitem{Venkatachalam2010} Venkatachalam,R. {\it et~al}. (2010) Identification of candidate predisposing copy number variants in familial and early-onset colorectal cancer patients. \textit{Int. J. Cancer}.
+
+\bibitem{Astolfi2010} Astolfi,A. {\it et~al}. (2010) A molecular portrait of gastrointestinal stromal tumors: an integrative analysis of gene expression profiling and high-resolution genomic copy number. \textit{Laboratory Investigation} \textbf{90}(9), 1285-1294.
+
+\bibitem{Morganella_2010} Morganella,S. \textit{et al}. (2010) VEGA: variational segmentation for copy number detection. \emph{Bioinformatics} \textbf{26}(25), 3020-3027.
+
+\bibitem{WangPennCNV_2007} Wang,K. {\it et~al}. (2007) PennCNV: an integrated hidden Markov model designed for high-resolution copy number variation detection in whole-genome SNP genotyping data. \textit{Genome Research} \textbf{17}, 1665-1674.
+\end{thebibliography}
 
 \end{document}

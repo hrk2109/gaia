@@ -5,7 +5,7 @@
 This function assess the significance of the chromosomal aberrations. Note that it uses the package qvalue.
 }
 \usage{
-runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = -1, num_iterations = 10, threshold = 0.25)
+runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = -1, num_iterations = 10, threshold = 0.25, hom_threshold = 0.12)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,6 +16,7 @@ runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = 
   \item{chromosomes}{[default=-1] the chromosomes that will be analyzed. If it setted as -1 (default value) all chromosomes will be analyzed.}
   \item{num_iterations}{[default=10] number of permutation steps.}
   \item{threshold}{[default=0.25] markers having q-value lower than this threshold are labeled as significantly aberrant.}
+  \item{hom_threshold}{[default=0.12] Threshold used for homogeneous peel-off. For values lower then 0 homogeneous peel-off is disabled.}
 }
 %\details{}
 \value{

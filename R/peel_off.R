@@ -1,5 +1,5 @@
 `peel_off` <-
-function(pvalues_list, threshold, chromosomes, aberrations){
+function(pvalues_list, threshold, chromosomes, aberrations, discontinuity, hom_threshold){
 
 regions_list <- list();
 
@@ -23,7 +23,7 @@ for (i in 1:length(aberrations)){
 		while ( min(tmp_qvalue) < threshold ){
 
 			# Extract the minimum peak of the chromosome
-			tmp_list <- search_peaks_in_regions(tmp_qvalue, 1, length(tmp_qvalue));
+			tmp_list <- search_peaks_in_regions(tmp_qvalue, 1, length(tmp_qvalue), discontinuity[[chromosome_index]], hom_threshold, threshold);
 			if (tmp_list[[1]] == -1){
 				break;
 			}else{

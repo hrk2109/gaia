@@ -24,7 +24,7 @@ for (i in 1:num_of_cnv){
 		if (start[1]!=-1){
 			for ( k in 1:length(start) ){
 				index <- index + 1;		
-	region_line <- c(chromosome_index, (cnv_index-1), markers[1,start[k]], markers[2,end[k]], ((markers[2,end[k]]-markers[1,start[k]])+1), qval[k]);
+	region_line <- c(chromosome_index, names(aberrations[i]), markers[1,start[k]], markers[2,end[k]], ((markers[2,end[k]]-markers[1,start[k]])+1), qval[k]);
 			aberration_matrix <- rbind(aberration_matrix, region_line);
 			}
 		}
