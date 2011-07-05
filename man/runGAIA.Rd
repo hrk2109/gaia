@@ -5,7 +5,7 @@
 This function assess the significance of the chromosomal aberrations. Note that it uses the package qvalue.
 }
 \usage{
-runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = -1, num_iterations = 10, threshold = 0.25, hom_threshold = 0.12)
+runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = -1, num_iterations = 10, threshold = 0.25, hom_threshold = 0.12, approximation=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,9 +14,10 @@ runGAIA(cnv_obj, markers_obj, output_file_name, aberrations = -1, chromosomes = 
   \item{output_file_name}{the name of the file in which the significant aberrant regions are saved.}
   \item{aberrations}{[default=-1] the aberrations that will be analyzed. If it setted as -1 (default value) all aberrations will be analyzed.}
   \item{chromosomes}{[default=-1] the chromosomes that will be analyzed. If it setted as -1 (default value) all chromosomes will be analyzed.}
-  \item{num_iterations}{[default=10] number of permutation steps.}
+  \item{num_iterations}{[default=10] if the number of permutation steps (if approximation is equal to -1) - the number of column of the approximation matrix (if approximation is different to -1).}
   \item{threshold}{[default=0.25] markers having q-value lower than this threshold are labeled as significantly aberrant.}
   \item{hom_threshold}{[default=0.12] Threshold used for homogeneous peel-off. For values lower then 0 homogeneous peel-off is disabled.}
+  \item{approximation}{[default=FALSE] if approximation is FALSE then GAIA explicitly performs the permutations, if it is TRUE then GAIA uses an approximated approach to compute the null distribution.}
 }
 %\details{}
 \value{
@@ -53,6 +54,9 @@ cnv_obj <- load_cnv(synthCNV_Matrix, markers_obj, 10)
 
 # run GAIA algorithm and save the results within the file "results.txt"
 runGAIA(cnv_obj, markers_obj, "results.txt")
+
+# run GAIA algorithm in its approximated version generating 5000 approximations
+runGAIA(cnv_obj, markers_obj, "results.txt", num_iterations=5000, approximation=TRUE)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

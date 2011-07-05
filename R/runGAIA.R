@@ -1,5 +1,5 @@
 `runGAIA` <-
-function(cnv_obj, markers_obj, output_file_name="",  aberrations=-1, chromosomes=-1, num_iterations=10, threshold=0.25, hom_threshold=0.12){
+function(cnv_obj, markers_obj, output_file_name="",  aberrations=-1, chromosomes=-1, num_iterations=10, threshold=0.25, hom_threshold=0.12, approximation=FALSE){
 
 # Chromosome indexing array
 if(chromosomes==-1){ 
@@ -83,7 +83,12 @@ for (k in 1:length(aberrations)){
 				
 		obs_data <- cnv_obj[[aberrations_index]][[chromosome_index]];
 		message(".", appendLF = FALSE);
-		null_hypothesis_chromosome_list[[chromosome_index]] <- generate_null_hypothesis(obs_data, num_iterations);
+		if(approximation==FALSE){
+			null_hypothesis_chromosome_list[[chromosome_index]] <- generate_null_hypothesis(obs_data, num_iterations);
+		}
+		if(approximation==TRUE){
+			null_hypothesis_chromosome_list[[chromosome_index]] <- generate_approx_null_hypothesis(obs_data, num_iterations);
+		}
 		
 	}	
 	null_hypothesis_list[[aberrations_index]] <- null_hypothesis_chromosome_list;

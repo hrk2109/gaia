@@ -170,9 +170,10 @@ This is the core function of the package, indeed it allows to execute GAIA algor
  \item[{\ttfamily output\_file\_name}]: (default \lq\lq\rq\rq) The file name used to save the significant aberrant regions. If this argument is not specified the results will be not saved into a file;
  \item[{\ttfamily aberrations}]: (default $-1$) The aberrations that will be analyzed. The default value $-1$ indicates that all aberration will be analyzed;
   \item[{\ttfamily chromosomes}]: (default $-1$) The chromosomes that will be to analyzed. The default value $-1$ indicates that all chromosomes will be analyzed;
-  \item[{\ttfamily num\_iterations}]: (default $10$) The number of random permutation used to estimate the probability distribution of the contemporary mutations expected for non-driver markers;
+  \item[{\ttfamily num\_iterations}]: (default $10$) if the number of permutation steps (if approximation is equal to -1) - the number of column of the approximation matrix (if approximation is different to -1);
   \item[{\ttfamily threshold}]: (default $0.25$) Markers having $q$-values lower than this threshold are labeled as significantly aberrant. This parameter must be a real number in the range $0-1$;
-  \item[{\ttfamily hom\_threshold}]: (default $0.12$) Threshold used in homogeneous peel-off (for more detail see Section \ref{hom_peeloff}). This parameter must be a real number in the range $0-1$ and by using  values lower than $-1$ homogeneous peel-off is disabled and standard peel-off procedure is used.
+  \item[{\ttfamily hom\_threshold}]: (default $0.12$) Threshold used in homogeneous peel-off (for more detail see Section \ref{hom_peeloff}). This parameter must be a real number in the range $0-1$ and by using  values lower than $-1$ homogeneous peel-off is disabled and standard peel-off procedure is used;
+  \item[{\ttfamily approximation}]: (default=FALSE) if approximation is FALSE then GAIA explicitly performs the permutations, if it is TRUE then GAIA uses an approximated approach to compute the null distribution.
  \end{description}
 
 Suppose that we want to analyze all aberrations and all chromosomes and that we want to save the results within the file CompleteResults.txt, than we use the following command:
@@ -207,7 +208,7 @@ results <- runGAIA(cnv_obj, markers_obj, "Results.txt", aberrations=1, chromosom
 
 \section{Homogeneous Peel-off}
 \label{hom_peeloff}
-In GAIA a new peel-off procedure, called homogeneous, is available. By usinh homogeneous peel-off significant regions are detected by using both statistical significance and within-sample homogeneity, so that more accurate results can be obtained. Homogeneou peel-off is disabled for values lower than 0.
+In GAIA a new peel-off procedure, called homogeneous, is available. By usinh homogeneous peel-off significant regions are detected by using both statistical significance and within-sample homogeneity, so that more accurate results can be obtained. Homogeneous peel-off is disabled for values lower than 0.
 
 Homogeneous peel-off can be used only if two kinds of aberrations are observed. In the next we show as homogeneous peel-off can be used on CRC dataset. The first step is composed by the loading of the data and the creation of the respective markers and aberrant regions descriptor objects:
 
@@ -222,6 +223,19 @@ Now we can run GAIA with homogeneous pee-off on the chromosome 14 by using the s
 
 <<runGAIA_on_CRC>>=
 res <- runGAIA(crc_cnv_obj, crc_markers_obj, "crcResults.txt",  chromosomes=14, hom_threshold=0.12)
+@
+
+Results of the computation are saved in the file crcResults.txt
+
+
+\section{Run GAIA with Approximation}
+\label{gaia_approximation}
+In GAIA a new approach to compute the null distribution is available. This approach performs an approximation of the permutations. In particular, after computed the frequency of alteration for each sample $\theta_j$, GAIA simulates a matrix with dimension $N\times K$ ($N$ is the number of samples and $K$ is the number of performed approximation) where each column is a vector in which the element $j$ has a probability for drawing $1$ equal to $\theta_j$. This asymptotically approximates the original simulation when $M\rightarrow\infty$ and since $M$ is large enough, it is well approximated in practice. So we suggest to use this approach in high resolution scenario.
+
+With the following command we run GAIA in its approximated version on all chromosomes by performing $K=5000$ approximations.
+
+<<runGAIA_approx_on_CRC>>=
+res <- runGAIA(crc_cnv_obj, crc_markers_obj, "crc_approx_Results.txt", hom_threshold=0.12, num_iterations=5000, approximation=TRUE)
 @
 
 Results of the computation are saved in the file crcResults.txt
