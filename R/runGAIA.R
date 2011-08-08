@@ -133,8 +133,41 @@ for (k in 1:length(aberrations)){
 	}	
 	pvalues_list[[aberrations_index]] <- pvalue_chromosome_list;
 }
-
 message("\nDone");
+# Generate the .gistic file
+if(length(aberrations)==2){
+	gistic_label <- c("Del", "Amp");
+	message("Writing ", paste(output_file_name, ".igv.gistic", sep=""), " input file for igv");
+	gistic <- matrix(nrow=0, ncol=8);
+	colnames(gistic) <- c("Type", "Chromosome", "Start", "End", "q-value", "G-score", "average amplitude", "frequency")
+	for (k in 1:length(aberrations)){
+		tmp_pvalue_list <- list();
+		for (i in 1:length(chromosomes)){
+			message(".", appendLF = FALSE);
+			curr_qval <- as.numeric(pvalues_list[[aberrations[k]]][[chromosomes[i]]]);
+			curr_qval <- qvalue(curr_qval)$qvalues;
+			start <- 1;
+			for(z in 2:(length(curr_qval))){
+				if(curr_qval[z-1]!=curr_qval[z]){
+					end <- z-1;
+					print_qval <- curr_qval[z-1];
+					
+					gistic <- rbind(gistic, c(gistic_label[k], chromosomes[i], markers_obj[[chromosomes[i]]][1,start],  
+								markers_obj[[chromosomes[i]]][2,end],print_qval,0,0,0)); 
+					start <- z;						
+				}
+			}
+			end <- length(curr_qval);
+			print_qval <- curr_qval[end];
+			gistic <- rbind(gistic, c(gistic_label[k], chromosomes[i], markers_obj[[chromosomes[i]]][1,start],  								markers_obj[[chromosomes[i]]][2,end], print_qval,0,0,0));
+				
+			
+		}
+	}
+	write.table(gistic, paste(output_file_name, ".igv.gistic", sep=""), sep="\t", col.names=TRUE, row.names=FALSE, eol="\n", quote=FALSE)
+	message("\nDone");
+}
+
 # Running the peel-off algorithm
 if(hom_threshold>=0){
 	message("Running Homogeneous peel-off Algorithm With a Significance Threshold of ", threshold,  " and Homogenous Threshold of ", hom_threshold);

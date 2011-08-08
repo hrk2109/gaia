@@ -240,6 +240,13 @@ res <- runGAIA(crc_cnv_obj, crc_markers_obj, "crc_approx_Results.txt", hom_thres
 
 Results of the computation are saved in the file crcResults.txt
 
+\section{Integration of GAIA and Integrative Genomics Viewer}
+\label{gaia_igv}
+The Integrative Genomics Viewer (IGV) \cite{IGV} is a high-performance visualization tool for interactive exploration of large, integrated datasets. It supports a wide variety of data types including sequence alignments, microarrays, and genomic annotations. 
+
+From version 1.5 GAIA produces in output a \lq\lq.gistic\rq\rq file that can be loaded in IGV so that computed $q$-values for all analyzed chromosomes can be plotted.
+
+
 \begin{thebibliography}{}
 
 \bibitem{Venkatachalam2010} Venkatachalam,R. {\it et~al}. (2010) Identification of candidate predisposing copy number variants in familial and early-onset colorectal cancer patients. \textit{Int. J. Cancer}.
@@ -249,6 +256,11 @@ Results of the computation are saved in the file crcResults.txt
 \bibitem{Morganella_2010} Morganella,S. \textit{et al}. (2010) VEGA: variational segmentation for copy number detection. \emph{Bioinformatics} \textbf{26}(25), 3020-3027.
 
 \bibitem{WangPennCNV_2007} Wang,K. {\it et~al}. (2007) PennCNV: an integrated hidden Markov model designed for high-resolution copy number variation detection in whole-genome SNP genotyping data. \textit{Genome Research} \textbf{17}, 1665-1674.
+
+\bibitem{IGV} Integrative Genomics Viewer (IGV): \url{http://www.broadinstitute.org/software/igv/home}
 \end{thebibliography}
+
+
+
 
 \end{document}
