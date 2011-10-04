@@ -29,7 +29,8 @@
 \section{Overview}
 A current challenge in biology is the characterization of genetic mutations that occur as response to a particular disease. Development of array comparative genomic hybridization (aCGH) technology has been a very important step in genomic mutation analysis, indeed, it enables copy number measurement in hundreds of thousands of genomic points (called markers or probes). Despite the high resolution of aCGH, accurate analysis of these data is yet a challenge. In particular a major difficulty in mutation identification is the distinction between driver mutations (that play a fundamental role in cancer progression) and passenger mutations (which are random alterations with no selective advantages).
 
-This document describes classes and functions of GAIA (Genomic Analysis of Important Aberrations) package. GAIA uses a statistical framework based on a conservative permutation test allowing the estimation of the probability distribution of the contemporary mutations expected for non-driver markers. Afterwards, the computed probability distribution and the observed data are used to assess the statistical significance (in terms of $q$-value) of each marker. Finally an iterative \lq\lq peel-off\rq\rq~procedure is used to identify the most significant independent regions which have a high probability to correspond to driver mutations.
+This document describes classes and functions of GAIA (Genomic Analysis of Important Aberrations) package. GAIA uses a statistical framework based on a conservative permutation test allowing the estimation of the probability distribution of the contemporary mutations expected for non-driver markers. Afterwards, the computed probability distribution and the observed data are used to assess the statistical significance (in terms of $q$-value) of each marker. Finally an iterative \lq\lq peel-off\rq\rq~procedure is used to identify the most significant independent regions which have a high probability to correspond to driver mutations.\\\\
+GAIA algorithm is carefully described in \cite{Morganella_2011}.
 
 \section{Installation}
 Install GAIA on your computer by using the following command:
@@ -248,6 +249,8 @@ From version 1.5 GAIA produces in output a \lq\lq.gistic\rq\rq file that can be 
 
 
 \begin{thebibliography}{}
+
+\bibitem{Morganella_2011} Morganella,S. \textit{et al}. (2010) Finding recurrent copy number alterations preserving within-sample homogeneity. \emph{Bioinformatics}, DOI: 10.1093/bioinformatics/btr488.
 
 \bibitem{Venkatachalam2010} Venkatachalam,R. {\it et~al}. (2010) Identification of candidate predisposing copy number variants in familial and early-onset colorectal cancer patients. \textit{Int. J. Cancer}.
 

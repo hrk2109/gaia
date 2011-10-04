@@ -1,6 +1,7 @@
 `runGAIA` <-
 function(cnv_obj, markers_obj, output_file_name="",  aberrations=-1, chromosomes=-1, num_iterations=10, threshold=0.25, hom_threshold=0.12, approximation=FALSE){
 
+message("\nPerforming Data Preprocessing");
 # Chromosome indexing array
 if(chromosomes==-1){ 
 	# We apply the algorithm to each chromosome
@@ -41,7 +42,8 @@ if(aberrations==-1){
 # Discontinuity Matrix for Homogeneous peel-off
 discontinuity <- list();
 if(length(aberrations)==2 && hom_threshold>=0){
-	message("\nComputing the Discontinuity Matrix");
+	message("\nDone");
+	message("\nComputing Discontinuity Matrix");
 	for (i in 1:length(chromosomes)){
 		message(".", appendLF = FALSE);
 		tmp <- cnv_obj[[2]][[chromosomes[i]]]-cnv_obj[[1]][[chromosomes[i]]];
@@ -54,10 +56,10 @@ if(length(aberrations)==2 && hom_threshold>=0){
 		}
 		discontinuity[[chromosomes[i]]] <- tmp_vec/nrow(cnv_obj[[2]][[chromosomes[i]]]);
 	}
-	message("\nDone");
+	
 }else{
 	if(length(aberrations)!=2 && hom_threshold>=0){
-		message("\nHomogeneous cannot be applied on the data (data must contain exactly two different kinds aberrations)\n");
+		message("\nHomogeneous cannot be applied on the data (data must contain exactly two different kinds of aberrations)\n");
 	}
 	for (i in 1:length(chromosomes)){
 		tmp <- cnv_obj[[1]][[chromosomes[i]]]-cnv_obj[[1]][[chromosomes[i]]];
@@ -66,14 +68,14 @@ if(length(aberrations)==2 && hom_threshold>=0){
 		hom_threshold = -1;
 	}
 }
-
+message("\nDone");
 
 # The bin size is fixed to 1
 # Generate The Null hypothesis for each chromosome and aberration
 null_hypothesis_list <- list();
 null_hypothesis_chromosome_list <- list();
 
-message("Computing the Probability Distribution");
+message("Computing Probability Distribution");
 for (k in 1:length(aberrations)){
 	null_hypothesis_chromosome_list <- list();
 	for (i in 1:length(chromosomes)){
@@ -110,7 +112,7 @@ message("\nDone");
 # Compute the pvalue for each cnv, chromosome and marker
 pvalues_list <- list();
 
-message("Assessing the Significance of the Observed Data");
+message("Assessing the Significance of Observed Data");
 for (k in 1:length(aberrations)){
 	pvalue_chromosome_list <- list();
 	for (i in 1:length(chromosomes)){
@@ -137,7 +139,7 @@ message("\nDone");
 # Generate the .gistic file
 if(length(aberrations)==2){
 	gistic_label <- c("Del", "Amp");
-	message("Writing ", paste(output_file_name, ".igv.gistic", sep=""), " input file for igv");
+	message("Writing ", paste(output_file_name, ".igv.gistic", sep=""), " File for Integrative Genomics Viewer (IGV) Tool");
 	gistic <- matrix(nrow=0, ncol=8);
 	colnames(gistic) <- c("Type", "Chromosome", "Start", "End", "q-value", "G-score", "average amplitude", "frequency")
 	for (k in 1:length(aberrations)){
@@ -170,15 +172,15 @@ if(length(aberrations)==2){
 
 # Running the peel-off algorithm
 if(hom_threshold>=0){
-	message("Running Homogeneous peel-off Algorithm With a Significance Threshold of ", threshold,  " and Homogenous Threshold of ", hom_threshold);
+	message("Running Homogeneous peel-off Algorithm With Significance Threshold of ", threshold,  " and Homogenous Threshold of ", hom_threshold);
 }else{
-	message("Running Standard the peel-off Algorithm With a Significance Threshold of ", threshold);
+	message("Running Standard peel-off Algorithm With Significance Threshold of ", threshold);
 }
 significant_regions_list <- peel_off(pvalues_list, threshold, chromosomes, aberrations, discontinuity, hom_threshold);
 #return(significant_regions_list);
 if(output_file_name!=""){
 	# Generation of output file
-	message("\nGenerating the Output File \'", output_file_name, "\' Containing the Significant Regions\n", sep="");
+	message("\nWriting Output File \'", output_file_name, "\' Containing the Significant Regions\n", sep="");
 	results <- write_significant_regions(markers_obj, significant_regions_list, output_file_name, chromosomes, aberrations);
 	message("File \'", output_file_name, "\' Saved\n", sep="");
 	

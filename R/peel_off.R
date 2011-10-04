@@ -19,9 +19,9 @@ for (i in 1:length(aberrations)){
 		start <- c();
 		end <- c();
 		qval <- c();
-		tmp_list <- list();
+		tmp_pvalue <- curr_pvalue;
 		while ( min(tmp_qvalue) < threshold ){
-
+			
 			# Extract the minimum peak of the chromosome
 			tmp_list <- search_peaks_in_regions(tmp_qvalue, 1, length(tmp_qvalue), discontinuity[[chromosome_index]], hom_threshold, threshold);
 			if (tmp_list[[1]] == -1){
@@ -32,13 +32,12 @@ for (i in 1:length(aberrations)){
 				for (k in 1:length(tmp_start)){
 					start <- c(start, tmp_start[k]);
 					end <- c(end, tmp_end[k]);
-					qval <- c(qval, curr_qvalue[tmp_start[k]]);
-					curr_pvalue[tmp_start[k]:tmp_end[k]] <- 1;
+					qval <- c(qval, tmp_qvalue[tmp_start[k]]);
+					tmp_pvalue[tmp_start[k]:tmp_end[k]] <- 1;
 				}	
 			}
-			qvals <- qvalue(curr_pvalue);
+			qvals <- qvalue(tmp_pvalue);
 			tmp_qvalue <- qvals$qvalues;
-				
 		}
 		if (length(start)>0){
 			property_list[[1]] <- start;

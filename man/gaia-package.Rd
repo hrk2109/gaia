@@ -7,6 +7,9 @@ GAIA: An R package for genomic analysis of significant chromosomal aberrations.
 }
 \description{
 GAIA (Genomic Analysis of Important Aberrations) allows to assess the statistical significance of chromosomal aberrations. A permutation test is used to compute the probability distribution of the normal case (no significant aberrations are present in the data) so that we can estimate the statistical significance of the observed data. In order to correct for multiple hypothesis testing the False Discovery Rate approach proposed by Storey et al. (2004) is used. Finally an iterative "peel-off" procedure is used to identify the most significant independent regions.
+
+GAIA is described in Morganella et al. (2011).
+
 }
 \details{
 \tabular{ll}{
@@ -24,7 +27,8 @@ LazyLoad: \tab yes\cr
 Maintainer: S. Morganella <morganellaalx@gmail.com>
 }
 \references{
-GAIA home page: http://www.dsba.unisannio.it/Members/ceccarelli/GAIA\cr
+Morganella S. et al. (2011). Finding recurrent copy number alterations preserving within-sample homogeneity. Bioinformatics. DOI: 10.1093/bioinformatics/btr488.
+
 Storey JD. et al. (2004). Strong control, conservative point estimation, and simultaneous conservative consistency of false discovery rates: A unified approach. Journal of the Royal Statistical Society. 66:187-205.
 }
 \examples{

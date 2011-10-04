@@ -32,42 +32,44 @@ if (in_min==TRUE){
 }
 
 # Extend boundaries of selected peak
-for(z in 1:length(end)){
-	curr_start <- start[z];
-	curr_end <- end[z];
+if(hom_threshold>=0){
+	for(z in 1:length(end)){
+		curr_start <- start[z];
+		curr_end <- end[z];
 
-	max_left <-  max(discontinuity[curr_start:start_region]);
-	new_start <- curr_start;
+		max_left <-  max(discontinuity[curr_start:start_region]);
+		new_start <- curr_start;
 
-	if( max_left >= hom_threshold && min(qvalues[curr_start:start_region])<threshold){
-		for(i in curr_start:start_region){
-			if(qvalues[i]>threshold){
+		if( max_left >= hom_threshold && min(qvalues[curr_start:start_region])<threshold){
+			for(i in curr_start:start_region){
+				if(qvalues[i]>threshold){
+						break;
+				}
+				if(discontinuity[i] >= hom_threshold && qvalues[i]<threshold){
+					new_start <- i+1;
 					break;
+				}
 			}
-			if(discontinuity[i] >= hom_threshold && qvalues[i]<threshold){
-				new_start <- i+1;
-				break;
+		}	
+	
+		new_end <- curr_end;
+		if(curr_end<end_region){
+			max_right <-  max(discontinuity[curr_end:(end_region-1)]);
+
+			if(max_right >= hom_threshold && min(qvalues[curr_end:end_region])<threshold){
+				for(i in curr_end:(end_region-1)){
+					if(qvalues[i]>threshold){
+						break;
+					}
+					if(discontinuity[i] >= hom_threshold && qvalues[i]<threshold){
+						new_end <- i;
+						break;
+					}
+				}
 			}
 		}
 	}	
-	
-	new_end <- curr_end;
-	if(curr_end<end_region){
-		max_right <-  max(discontinuity[curr_end:(end_region-1)]);
-
-		if(max_right >= hom_threshold && min(qvalues[curr_end:end_region])<threshold){
-			for(i in curr_end:(end_region-1)){
-				if(qvalues[i]>threshold){
-					break;
-				}
-				if(discontinuity[i] >= hom_threshold && qvalues[i]<threshold){
-					new_end <- i;
-					break;
-				}
-			}
-		}
-	}
-}	
+}
 list_peaks[[1]] <- start;
 list_peaks[[2]] <- end;
 return(list_peaks);	
