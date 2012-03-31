@@ -5,7 +5,9 @@ message("\nPerforming Data Preprocessing");
 # Chromosome indexing array
 if(chromosomes==-1){ 
 	# We apply the algorithm to each chromosome
-	chromosomes <- as.numeric(names(markers_obj));
+	chromosomes <- as.numeric(sort(unique(names(markers_obj))));
+	chromosomes <- chromosomes[which(!is.na(chromosomes))];
+
 }else{
 	known_chr <- as.numeric(names(markers_obj));
 	if( (length(known_chr[chromosomes])!= length(chromosomes)) || (sum(is.na(known_chr[chromosomes]))>0) ){
@@ -147,7 +149,7 @@ if(length(aberrations)==2){
 		for (i in 1:length(chromosomes)){
 			message(".", appendLF = FALSE);
 			curr_qval <- as.numeric(pvalues_list[[aberrations[k]]][[chromosomes[i]]]);
-			curr_qval <- qvalue(curr_qval)$qvalues;
+			curr_qval <- qvalue(curr_qval);
 			start <- 1;
 			for(z in 2:(length(curr_qval))){
 				if(curr_qval[z-1]!=curr_qval[z]){
@@ -177,7 +179,7 @@ if(hom_threshold>=0){
 	message("Running Standard peel-off Algorithm With Significance Threshold of ", threshold);
 }
 significant_regions_list <- peel_off(pvalues_list, threshold, chromosomes, aberrations, discontinuity, hom_threshold);
-#return(significant_regions_list);
+#return(list(significant_regions_list, chromosomes));
 if(output_file_name!=""){
 	# Generation of output file
 	message("\nWriting Output File \'", output_file_name, "\' Containing the Significant Regions\n", sep="");

@@ -4,8 +4,8 @@ function(segmentation_matrix, markers_list, num_of_samples){
 message("Loading Copy Number Data");
 
 # Detect the chromosomes
-chromosomes <- names(markers_list);
-
+chromosomes <- as.numeric(sort(unique(names(markers_list))));
+chromosomes <- chromosomes[which(!is.na(chromosomes))];
 
 # Detect the aberration kinds
 aberration_kinds <- 1:length(unique(segmentation_matrix[,6]));
