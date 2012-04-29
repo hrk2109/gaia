@@ -10,5 +10,5 @@ License: GPL-2
 Collate: load_cnv.R load_markers.R runGAIA.R generate_null_hypothesis.R generate_approx_null_hypothesis.R qvalue.R peel_off.R search_peaks_in_regions.R write_significant_regions.R
 LazyLoad: yes
 Depends: R (>= 2.10)
-biocViews: aCGH, DNACopyNumber
+biocViews: aCGH, CopyNumberVariants
 Packaged: 2011-04-21 12:56:43 UTC; morgan
