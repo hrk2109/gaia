@@ -1,0 +1,18 @@
+Package: gaia
+Type: Package
+Title: GAIA: An R package for genomic analysis of significant
+        chromosomal aberrations.
+Version: 2.10.0
+Date: 2010-09-13
+Author: Sandro Morganella et al.
+Maintainer: S. Morganella <sandro@ebi.ac.uk>
+Description: This package allows to assess the statistical significance
+        of chromosomal aberrations.
+License: GPL-2
+Collate: load_cnv.R load_markers.R runGAIA.R generate_null_hypothesis.R
+        generate_approx_null_hypothesis.R qvalue.R peel_off.R
+        search_peaks_in_regions.R write_significant_regions.R
+LazyLoad: yes
+Depends: R (>= 2.10)
+Packaged: 2011-04-21 12:56:43 UTC; morgan
+biocViews: aCGH, CopyNumberVariation
