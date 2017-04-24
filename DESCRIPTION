@@ -2,7 +2,7 @@ Package: gaia
 Type: Package
 Title: GAIA: An R package for genomic analysis of significant
         chromosomal aberrations.
-Version: 2.20.0
+Version: 2.21.0
 Date: 2010-09-13
 Author: Sandro Morganella et al.
 Maintainer: S. Morganella <sandro@ebi.ac.uk>
