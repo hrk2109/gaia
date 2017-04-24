@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+export(runGAIA)
+export(load_cnv)
+export(load_markers)
